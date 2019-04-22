@@ -39,6 +39,7 @@ if (STATIC_LINKING)
 else()
   target_link_libraries(bpftrace ${LIBBCC_LIBRARIES})
 endif()
+target_link_libraries(bpftrace ${Boost_LIBRARIES})
 target_link_libraries(bpftrace ${LIBELF_LIBRARIES})
 
 install(TARGETS bpftrace DESTINATION bin)

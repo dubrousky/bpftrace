@@ -24,6 +24,7 @@ add_compile_options("-Wunreachable-code")
 #add_compile_options("-Wformat=2")
 add_compile_options("-Wstrict-overflow=5")
 add_compile_options("-Wdisabled-optimization")
+add_compile_options("-nodefaultlibs")
 
 include(CTest)
 
@@ -35,6 +36,10 @@ if (STATIC_LINKING)
 endif()
 
 set(FIND_LIBRARY_USE_LIB64_PATHS TRUE)
+
+find_package(Boost COMPONENTS regex REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIR})
 
 find_package(LibBcc REQUIRED)
 include_directories(SYSTEM ${LIBBCC_INCLUDE_DIRS})

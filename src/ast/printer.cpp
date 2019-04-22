@@ -1,4 +1,4 @@
-#include <regex>
+#include <boost/regex.hpp>
 
 #include "printer.h"
 #include "ast.h"
@@ -23,10 +23,10 @@ void Printer::visit(String &string)
   std::string indent(depth_, ' ');
 
   std::string str = string.str;
-  str = std::regex_replace(str, std::regex("\\\\"), "\\\\");
-  str = std::regex_replace(str, std::regex("\n"), "\\n");
-  str = std::regex_replace(str, std::regex("\t"), "\\t");
-  str = std::regex_replace(str, std::regex("\""), "\\\"");
+  str = boost::regex_replace(str, boost::regex("\\\\"), "\\\\");
+  str = boost::regex_replace(str, boost::regex("\n"), "\\n");
+  str = boost::regex_replace(str, boost::regex("\t"), "\\t");
+  str = boost::regex_replace(str, boost::regex("\""), "\\\"");
 
   out_ << indent << "string: " << str << std::endl;
 }

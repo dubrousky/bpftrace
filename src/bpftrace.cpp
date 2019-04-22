@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <regex>
+#include <boost/regex.hpp>
 #include <sstream>
 #include <sys/epoll.h>
 #include <time.h>
@@ -154,18 +154,18 @@ std::set<std::string> BPFtrace::find_wildcard_matches(const std::string &prefix,
   if (!has_wildcard(func))
     return std::set<std::string>({func});
   // Turn glob into a regex
-  auto regex_str = "(" + std::regex_replace(func, std::regex("\\*"), "[^\\s]*") + ")";
+  auto regex_str = "(" + boost::regex_replace(func, boost::regex("\\*"), "[^\\s]*") + ")";
   if (prefix != "")
     regex_str = prefix + ":" + regex_str;
   regex_str = "^" + regex_str;
-  std::regex func_regex(regex_str);
-  std::smatch match;
+  boost::regex func_regex(regex_str);
+  boost::smatch match;
 
   std::string line;
   std::set<std::string> matches;
   while (std::getline(symbol_name_stream, line))
   {
-    if (std::regex_search(line, match, func_regex))
+    if (boost::regex_search(line, match, func_regex))
     {
       assert(match.size() == 2);
       // skip the ".part.N" kprobe variants, as they can't be traced:
@@ -1541,12 +1541,12 @@ uint64_t BPFtrace::resolve_kname(const std::string &name)
 
   std::string search = "\\b";
   search += name;
-  std::regex e (search + "\\b");
-  std::smatch match;
+  boost::regex e (search + "\\b");
+  boost::smatch match;
 
   while (std::getline(file, line) && addr == 0)
   {
-    auto found = std::regex_search (line, match, e);
+    auto found = boost::regex_search (line, match, e);
 
     if (found)
     {

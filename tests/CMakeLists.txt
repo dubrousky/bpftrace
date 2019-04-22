@@ -48,6 +48,7 @@ if (STATIC_LINKING)
 else()
   target_link_libraries(bpftrace_test ${LIBBCC_LIBRARIES})
 endif()
+target_link_libraries(bpftrace_test ${Boost_LIBRARIES})
 target_link_libraries(bpftrace_test ${LIBELF_LIBRARIES})
 
 find_package(Threads REQUIRED)

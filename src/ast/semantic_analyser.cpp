@@ -8,7 +8,7 @@
 #include "arch/arch.h"
 #include "list.h"
 #include <sys/stat.h>
-#include <regex>
+#include <boost/regex.hpp>
 
 #include "libbpf.h"
 
@@ -1251,7 +1251,7 @@ bool SemanticAnalyser::check_alpha_numeric(const Call &call, int arg_num __attri
 
   auto &arg = static_cast<String&>(*call.vargs->at(0)).str;
 
-  bool is_alpha = std::regex_match(arg, std::regex("^[a-zA-Z0-9_-]+$"));
+  bool is_alpha = boost::regex_match(arg, boost::regex("^[a-zA-Z0-9_-]+$"));
   if (!is_alpha)
   {
     err_ << call.func << "() expects an alpha numeric string as input";

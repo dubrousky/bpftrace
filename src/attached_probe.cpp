@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <link.h>
-#include <regex>
+#include <boost/regex.hpp>
 #include <sys/auxv.h>
 #include <sys/utsname.h>
 #include <tuple>
@@ -214,7 +214,7 @@ std::string AttachedProbe::sanitise(const std::string &str)
    * Characters such as "." in event names are rejected by the kernel,
    * so sanitize:
    */
-  return std::regex_replace(str, std::regex("[^A-Za-z0-9_]"), "_");
+  return boost::regex_replace(str, boost::regex("[^A-Za-z0-9_]"), "_");
 }
 
 uint64_t AttachedProbe::offset() const
@@ -304,10 +304,10 @@ static unsigned kernel_version(int attempt)
       std::ifstream linux_version_header{"/usr/include/linux/version.h"};
       const std::string content{std::istreambuf_iterator<char>(linux_version_header),
                                 std::istreambuf_iterator<char>()};
-      const std::regex regex{"#define\\s+LINUX_VERSION_CODE\\s+(\\d+)"};
-      std::smatch match;
+      const boost::regex regex{"#define\\s+LINUX_VERSION_CODE\\s+(\\d+)"};
+      boost::smatch match;
 
-      if (std::regex_search(content.begin(), content.end(), match, regex))
+      if (boost::regex_search(content.begin(), content.end(), match, regex))
         return static_cast<unsigned>(std::stoi(match[1]));
 
       return 0;

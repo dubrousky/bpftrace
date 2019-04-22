@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <regex>
+#include <boost/regex.hpp>
 #include <vector>
 #include <string>
 
@@ -19,14 +19,14 @@ namespace bpftrace {
 const std::string kprobe_path = "/sys/kernel/debug/tracing/available_filter_functions";
 const std::string tp_path = "/sys/kernel/debug/tracing/events";
 
-inline bool search_probe(const std::string &probe, const std::regex& re)
+inline bool search_probe(const std::string &probe, const boost::regex& re)
 {
   try {
-    if (std::regex_search(probe, re))
+    if (boost::regex_search(probe, re))
       return false;
     else
       return true;
-   } catch(std::regex_error& e) {
+   } catch(boost::regex_error& e) {
        return true;
   }
 }
@@ -55,7 +55,7 @@ void usdt_each(struct bcc_usdt *usdt)
 
 void list_probes_from_list(const std::vector<ProbeListItem> &probes_list,
                            const std::string &probetype, const std::string &search,
-                           const std::regex& re)
+                           const boost::regex& re)
 {
   std::string probe;
 
@@ -77,8 +77,8 @@ void print_tracepoint_args(const std::string &category, const std::string &event
 {
   std::string format_file_path = tp_path + "/" + category + "/" + event + "/format";
   std::ifstream format_file(format_file_path.c_str());
-  std::regex re("^	field:.*;$", std::regex::icase | std::regex::grep | std::regex::nosubs |
-                                     std::regex::optimize);
+  boost::regex re("^	field:.*;$", boost::regex::icase | boost::regex::grep | boost::regex::nosubs |
+                                     boost::regex::optimize);
   std::string line;
 
   if (format_file.fail())
@@ -95,7 +95,7 @@ void print_tracepoint_args(const std::string &category, const std::string &event
   for (; getline(format_file, line); )
   {
     try {
-      if (std::regex_match(line, re))
+      if (boost::regex_match(line, re))
       {
         unsigned idx = line.find(":") + 1;
         line = line.substr(idx);
@@ -103,7 +103,7 @@ void print_tracepoint_args(const std::string &category, const std::string &event
         line = line.substr(0, idx);
         std::cout << "    " << line << std::endl;
       }
-    } catch(std::regex_error& e) {
+    } catch(boost::regex_error& e) {
       return;
     }
   }
@@ -113,15 +113,16 @@ void list_probes(const std::string &search_input, int pid)
 {
   std::string search = search_input;
 
-  std::smatch probe_match;
-  std::regex probe_regex(":.*");
-  std::regex_search ( search, probe_match, probe_regex );
+  boost::smatch probe_match;
+  std::string searchexpr = ":";
+  boost::regex probe_regex(searchexpr);
+  auto iret = boost::regex_search ( search, probe_match, probe_regex );
 
   // replace alias name with full name
-  if (probe_match.size())
+  if (iret && probe_match.size())
   {
-    auto pos = probe_match.position(0);
-    auto probe_name =  probetypeName(search.substr(0, probe_match.position(0)));
+    auto pos = probe_match.position();
+    auto probe_name =  probetypeName(search.substr(0, probe_match.position()));
     search = probe_name + search.substr(pos, search.length());
   }
 
@@ -136,7 +137,7 @@ void list_probes(const std::string &search_input, int pid)
       s += c;
   }
   s += '$';
-  std::regex re(s, std::regex::icase | std::regex::grep | std::regex::nosubs | std::regex::optimize);
+  boost::regex re(s, boost::regex::icase | boost::regex::grep | boost::regex::nosubs | boost::regex::optimize);
 
   // software
   list_probes_from_list(SW_PROBE_LIST, "software", search, re);
